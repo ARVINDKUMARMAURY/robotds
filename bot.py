@@ -16,9 +16,9 @@ from telethon.tl.functions.channels import JoinChannelRequest
 from telethon.tl.functions.messages import ImportChatInviteRequest
 from telethon.errors import FloodWaitError
 
-# ✅ YAHAN KUCH NAHI BADLNA – ORIGINAL IMPORT
+# ✅ CHANGE #1: AudioPiped → MediaStream
 from pytgcalls import PyTgCalls
-from pytgcalls.types import AudioPiped
+from pytgcalls.types import MediaStream   # Yahan AudioPiped ki jagah MediaStream
 
 # ========== CONFIG (Environment Variables) ==========
 OWNER_ID = int(os.environ.get("OWNER_ID", 0))
@@ -286,7 +286,8 @@ async def attack_cmd(event):
         if STEALTH_MODE:
             await asyncio.sleep(random.uniform(2, 5))
         pytgcalls = bot_state["pytgcalls"]
-        await pytgcalls.join_group_call(chat_id, AudioPiped(audio_buf))
+        # ✅ CHANGE #2: AudioPiped(audio_buf) → MediaStream(audio_buf)
+        await pytgcalls.join_group_call(chat_id, MediaStream(audio_buf))
         await event.reply(f"[✅] Audio playing for {AUDIO_DURATION}s")
         if vc_ip and vc_port:
             threading.Thread(
