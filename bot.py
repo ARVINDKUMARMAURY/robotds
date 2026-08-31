@@ -12,13 +12,14 @@ import wave
 import numpy as np
 
 from telethon import TelegramClient, events
+from telethon.sessions import StringSession   # ✅ Import add
 from telethon.tl.functions.channels import JoinChannelRequest
 from telethon.tl.functions.messages import ImportChatInviteRequest
 from telethon.errors import FloodWaitError
 
-# ✅ CHANGE #1: AudioPiped → MediaStream
+# ✅ MediaStream use karein (AudioPiped nahi)
 from pytgcalls import PyTgCalls
-from pytgcalls.types import MediaStream   # Yahan AudioPiped ki jagah MediaStream
+from pytgcalls.types import MediaStream
 
 # ========== CONFIG (Environment Variables) ==========
 OWNER_ID = int(os.environ.get("OWNER_ID", 0))
@@ -286,7 +287,7 @@ async def attack_cmd(event):
         if STEALTH_MODE:
             await asyncio.sleep(random.uniform(2, 5))
         pytgcalls = bot_state["pytgcalls"]
-        # ✅ CHANGE #2: AudioPiped(audio_buf) → MediaStream(audio_buf)
+        # ✅ MediaStream use kar rahe hain
         await pytgcalls.join_group_call(chat_id, MediaStream(audio_buf))
         await event.reply(f"[✅] Audio playing for {AUDIO_DURATION}s")
         if vc_ip and vc_port:
@@ -406,12 +407,8 @@ async def main():
         sys.exit(1)
     load_bot_config()
     print("[📡] Starting user account (Telethon)...")
-    app = TelegramClient(
-        "vc_session",
-        API_ID,
-        API_HASH,
-        session_string=SESSION_STRING
-    )
+    # ✅ FIX: StringSession use karein
+    app = TelegramClient(StringSession(SESSION_STRING), API_ID, API_HASH)
     await app.start()
     user = await app.get_me()
     print(f"[👤] Logged in as: {user.first_name} (ID: {user.id})")
