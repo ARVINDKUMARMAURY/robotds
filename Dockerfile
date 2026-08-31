@@ -1,18 +1,17 @@
-FROM python:3.11-slim
+FROM python:3.10-slim
 
-WORKDIR /app
-
-# System deps (audio/streaming ke liye ffmpeg chahiye pytgcalls ko)
-RUN apt-get update && apt-get install -y --no-install-recommends \
+RUN apt-get update && apt-get install -y \
+    gcc \
+    g++ \
+    python3-dev \
     ffmpeg \
     && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
 
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-COPY vc_bot.py .
+COPY VC_bot.py .
 
-# Railway PORT env khud inject karta hai, isliye EXPOSE sirf docs ke liye
-EXPOSE 8080
-
-CMD ["python", "vc_bot.py"]
+CMD ["python", "bot.py"]
