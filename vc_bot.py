@@ -14,8 +14,9 @@ from telethon.tl.functions.channels import JoinChannelRequest
 from telethon.tl.functions.messages import ImportChatInviteRequest
 from telethon.errors import FloodWaitError
 
-from pytgcalls import PyTgCalls
-from pytgcalls.types import MediaStream
+# ✅ CHANGE #1: py_tgcalls se import karein
+from py_tgcalls import PyTgCalls
+from py_tgcalls.types import MediaStream   # AudioPiped ki jagah
 
 # ========== CONFIG (Railway env vars) ==========
 OWNER_ID = int(os.environ.get("OWNER_ID", 0))
@@ -38,7 +39,6 @@ bot_state = {
 }
 # ================================================
 
-# ✅ FIX 2: save_config() – stray word "mutations" hata diya
 def save_config():
     with open(CONFIG_FILE, "w") as f:
         json.dump({
@@ -163,14 +163,13 @@ async def attack_cmd(event):
             tf.write(buf.read())
             audio_path = tf.name
 
-        await bot_state["pytgcalls"].play(chat_id, MediaStream(audio_path))
+        # ✅ CHANGE #2: play → join_group_call
+        await bot_state["pytgcalls"].join_group_call(chat_id, MediaStream(audio_path))
         await event.reply(f"[✅] Noise playing for {AUDIO_DURATION}s")
         await asyncio.sleep(AUDIO_DURATION + 2)
 
-        try:
-            await bot_state["pytgcalls"].leave_call(chat_id)
-        except Exception:
-            pass
+        # ✅ CHANGE #3: leave_call → leave_group_call
+        await bot_state["pytgcalls"].leave_group_call(chat_id)
         await event.reply("[✅] Attack complete!")
     except Exception as e:
         await event.reply(f"[❌] Error: {e}")
@@ -182,13 +181,13 @@ async def attack_cmd(event):
 @owner_only
 async def stop_cmd(event):
     try:
-        await bot_state["pytgcalls"].leave_call(bot_state["target_id"])
+        # ✅ CHANGE #4: leave_call → leave_group_call
+        await bot_state["pytgcalls"].leave_group_call(bot_state["target_id"])
         await event.reply("[⏹️] Stopped.")
     except Exception:
         await event.reply("ℹ️ Nothing active.")
     bot_state["is_attacking"] = False
 
-# ✅ FIX 3: set_cmd() – stray "byte" hata diya, else se pehle kuch nahi
 @owner_only
 async def set_cmd(event):
     global AUDIO_DURATION, TONE_FREQUENCY
@@ -227,7 +226,6 @@ async def main():
         print("[!] ERROR: SESSION_STRING, API_ID, API_HASH, OWNER_ID set karo!")
         sys.exit(1)
 
-    # ✅ FIX 1: load_bot_config() → load_config()
     load_config()
 
     app = TelegramClient(StringSession(SESSION_STRING), API_ID, API_HASH)
