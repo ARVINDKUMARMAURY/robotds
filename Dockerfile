@@ -1,6 +1,5 @@
 FROM python:3.11-slim
 
-# System dependencies (ffmpeg, git, compilers)
 RUN apt-get update && apt-get install -y \
     gcc \
     g++ \
@@ -11,15 +10,12 @@ RUN apt-get update && apt-get install -y \
 
 WORKDIR /app
 
-# Pehle requirements install karo (telethon, numpy, aiohttp)
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# 🔥 Ab GitHub se pytgcalls install karo (latest master)
+# 🔥 GitHub se latest pytgcalls (jisme MediaStream hai)
 RUN pip install --no-cache-dir git+https://github.com/pytgcalls/pytgcalls.git
 
-# Bot code copy karo
 COPY bot.py .
 
-# Run
 CMD ["python", "bot.py"]
